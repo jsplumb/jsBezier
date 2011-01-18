@@ -1,7 +1,8 @@
 /**
 * jsBezier-0.2 
 * 
-* a set of Bezier curve functions that deal with Beziers, used by jsPlumb, and perhaps useful for other people.
+* a set of Bezier curve functions that deal with Beziers, used by jsPlumb, and perhaps useful for other people.  These functions work with Bezier
+* curves of arbitrary degree.
 *
 * - functions are all in the 'jsBezier' namespace.  
 * 
@@ -18,7 +19,7 @@
 * 
 * distanceFromCurve(point, curve)
 * 
-* 	Calculates the distance that the given point lies from the given Cubic Bezier.  Note that it is computed relative to the center of the Bezier,
+* 	Calculates the distance that the given point lies from the given Bezier.  Note that it is computed relative to the center of the Bezier,
 * so if you have stroked the curve with a wide pen you may wish to take that into account!  The distance returned is relative to the values 
 * of the curve and the point - it will most likely be pixels.
 * 
@@ -33,7 +34,7 @@
 * 
 * pointOnCurve(curve, location)
 * 
-* 	Calculates the coordinates of the point on the given cubic Bezier curve at the given location.  
+* 	Calculates the coordinates of the point on the given Bezier curve at the given location.  
 * 		
 * pointAlongCurveFrom(curve, location, distance)
 * 
@@ -45,12 +46,7 @@
 * 	Calculates the perpendicular to the given curve at the given location.  length is the length of the line you wish for (it will be centered
 * on the point at 'location'). distance is optional, and allows you to specify a point along the path from the given location as the center of
 * the perpendicular returned.  The return value of this is an array of two points: [ {x:...,y:...}, {x:...,y:...} ].  
-* 
-* quadraticPointOnCurve(curve, location)
-* 
-* 	Calculates the coordinates of the point on the given quadratic Bezier curve at the given location.  This function is used internally by
-* pointOnCurve, and is exposed just because it seemed churlish not to do so.  But remember that all the other functions in this library deal with
-* cubic Beziers.  
+*  
 * 
 */
 
@@ -239,35 +235,55 @@
 	    return (temp[degree][0]);
 	};
 	
+	var _curveFunctionCache = {};
+	var _getCurveFunctions = function(order) {
+		var fns = _curveFunctionCache[order];
+		if (!fns) {
+			fns = [];			
+			var f_term = function() { return function(t) { return Math.pow(t, order); }; };
+			var l_term = function() { return function(t) { return Math.pow((1-t), order); }; };
+			var c_term = function(c) { return function(t) { return c; }; };
+			var t_term = function() { return function(t) { return t; }; };
+			var one_minus_t_term = function() { return function(t) { return 1-t; }; };
+			var _termFunc = function(terms) {
+				return function(t) {
+					var p = 1;
+					for (var i = 0; i < terms.length; i++) p = p * terms[i](t);
+					return p;
+				};
+			};
+			
+			fns.push(new f_term());  // first is t to the power of the curve order		
+			for (var i = 1; i < order; i++) {
+				var terms = [new c_term(order)];
+				for (var j = 0 ; j < (order - i); j++) terms.push(new t_term());
+				for (var j = 0 ; j < i; j++) terms.push(new one_minus_t_term());
+				fns.push(new _termFunc(terms));
+			}
+			fns.push(new l_term());  // last is (1-t) to the power of the curve order
+		
+			_curveFunctionCache[order] = fns;
+		}
+			
+		return fns;
+	};
+	
+	
 	/**
-	 * calculates a point on the curve, for a cubic bezier (TODO: fold this and the other function into one). 
+	 * calculates a point on the curve, for a Bezier of arbitrary order.
 	 * @param curve an array of control points, eg [{x:10,y:20}, {x:50,y:50}, {x:100,y:100}, {x:120,y:100}].  For a cubic bezier this should have four points.
 	 * @param location a decimal indicating the distance along the curve the point should be located at.  this is the distance along the curve as it travels, taking the way it bends into account.  should be a number from 0 to 1, inclusive.
 	 */
-	var _pointOnPath = function(curve, location) {
-		function B1(t) { return t*t*t; };
-		function B2(t) { return 3*t*t*(1-t); };
-		function B3(t) { return 3*t*(1-t)*(1-t); };
-		function B4(t) { return (1-t)*(1-t)*(1-t); };
+	var _pointOnPath = function(curve, location) {		
+		var cc = _getCurveFunctions(curve.length - 1);
+		var _x = 0, _y = 0;
+		for (var i = 0; i < curve.length ; i++) {
+			_x = _x + (curve[i].x * cc[i](location));
+			_y = _y + (curve[i].y * cc[i](location));
+		}
 		
-		var x = curve[0].x*B1(location) + curve[1].x * B2(location) + curve[2].x * B3(location) + curve[3].x * B4(location);
-		var y = curve[0].y*B1(location) + curve[1].y * B2(location) + curve[2].y * B3(location) + curve[3].y * B4(location);
-		return {x:x, y:y};
-	};
-	
-	/**
-	 * calculates a point on the curve, for a quadratic bezier (TODO: fold this and the other function into one). 
-	 * @param curve an array of control points, eg [{x:10,y:20}, {x:50,y:50}, {x:100,y:100}].  For a quadratic bezier this should have three points.
-	 * @param location a decimal indicating the distance along the curve the point should be located at.  this is the distance along the curve as it travels, taking the way it bends into account.  should be a number from 0 to 1, inclusive.
-	 */
-	var _quadraticPointOnPath = function(curve, location) {
-		function B1(t) { return t*t; };
-		function B2(t) { return 2*t*(1-t); };
-		function B3(t) { return (1-t)*(1-t); };
-		var x = curve[0].x*B1(location) + curve[1].x*B2(location) + curve[2].x*B3(location);
-		var y = curve[0].y*B1(location) + curve[1].y*B2(location) + curve[2].y*B3(location);
-		return {x:x,y:y};
-	};
+		return {x:_x, y:_y};
+	};	
 	
 	/**
 	 * finds the point that is 'distance' along the path from 'location'.  this method returns both the x,y location of the point and also
@@ -301,7 +317,7 @@
 	 */
 	var _gradientAtPoint = function(curve, location) {
 		var p1 = _pointOnPath(curve, location);	
-		var p2 = _quadraticPointOnPath(curve, location);
+		var p2 = _pointOnPath(curve.slice(0, curve.length - 1), location);
 		var dy = p2.y - p1.y, dx = p2.x - p1.x;
 		return Math.atan(dy / dx);		
 	};
@@ -326,7 +342,6 @@
 		nearestPointOnCurve : _nearestPointOnCurve,
 		pointOnCurve : _pointOnPath,		
 		pointAlongCurveFrom : _pointAlongPathFrom,
-		perpendicularToCurveAt : _perpendicularToPathAt,
-		quadraticPointOnCurve : _quadraticPointOnPath			//TODO fold the two pointOnPath functions into one; it can detect what it was given.
+		perpendicularToCurveAt : _perpendicularToPathAt
 	};
 })();
