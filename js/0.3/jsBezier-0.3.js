@@ -115,9 +115,10 @@
 	    return {point:_bezier(curve, curve.length - 1, td.location, null, null), location:td.location};
 	};
 	var _convertToBezier = function(point, curve) {
-		var degree = curve.length - 1, higherDegree = (2 * degree) - 1;
-	    var c = [], d = [], cdTable = [], w = [];
-	    var z = [ [1.0, 0.6, 0.3, 0.1], [0.4, 0.6, 0.6, 0.4], [0.1, 0.3, 0.6, 1.0] ];	
+		var degree = curve.length - 1, higherDegree = (2 * degree) - 1,
+	    	c = [], d = [], cdTable = [], w = [],
+	    	z = [ [1.0, 0.6, 0.3, 0.1], [0.4, 0.6, 0.6, 0.4], [0.1, 0.3, 0.6, 1.0] ];	
+	    	
 	    for (var i = 0; i <= degree; i++) c[i] = Vectors.subtract(curve[i], point);
 	    for (var i = 0; i <= degree - 1; i++) { 
 			d[i] = Vectors.subtract(curve[i+1], curve[i]);
@@ -136,8 +137,8 @@
 	    }
 	    var n = degree, m = degree-1;
 	    for (var k = 0; k <= n + m; k++) {
-			var lb = Math.max(0, k - m);
-			var ub = Math.min(k, n);
+			var lb = Math.max(0, k - m),
+				ub = Math.min(k, n);
 			for (i = lb; i <= ub; i++) {
 		    	j = k - i;
 		    	w[i+j].y += cdTable[j][i] * z[j][i];
@@ -149,9 +150,10 @@
 	 * counts how many roots there are.
 	 */
 	var _findRoots = function(w, degree, t, depth) {  
-	    var left = [], right = [];	
-	    var left_count, right_count;	
-	    var left_t = [], right_t = [];
+	    var left = [], right = [],	
+	    	left_count, right_count,	
+	    	left_t = [], right_t = [];
+	    	
 	    switch (_getCrossingCount(w, degree)) {
 	       	case 0 : {	
 	       		return 0;	
@@ -176,8 +178,7 @@
 		return (left_count+right_count);
 	};
 	var _getCrossingCount = function(curve, degree) {
-	    var 	n_crossings = 0;	
-	    var		sign, old_sign;		    	
+	    var n_crossings = 0, sign, old_sign;		    	
 	    sign = old_sign = Math.sgn(curve[0].y);
 	    for (var i = 1; i <= degree; i++) {
 			sign = Math.sgn(curve[i].y);
@@ -187,9 +188,9 @@
 	    return n_crossings;
 	};
 	var _isFlatEnough = function(curve, degree) {
-	    var  error;
-	    var  intercept_1, intercept_2, left_intercept, right_intercept;
-	    var  a, b, c, det, dInv, a1, b1, c1, a2, b2, c2;
+	    var  error,
+	    	intercept_1, intercept_2, left_intercept, right_intercept,
+	    	a, b, c, det, dInv, a1, b1, c1, a2, b2, c2;
 	    a = curve[0].y - curve[degree].y;
 	    b = curve[degree].x - curve[0].x;
 	    c = curve[0].x * curve[degree].y - curve[degree].x * curve[0].y;
@@ -219,11 +220,11 @@
 	    return (error < flatnessTolerance)? 1 : 0;
 	};
 	var _computeXIntercept = function(curve, degree) {
-	    var XLK = 1.0, YLK = 0.0;
-	    var XNM = curve[degree].x - curve[0].x, YNM = curve[degree].y - curve[0].y;
-	    var XMK = curve[0].x - 0.0, YMK = curve[0].y - 0.0;
-	    var det = XNM*YLK - YNM*XLK, detInv = 1.0/det;
-	    var S = (XNM*YMK - YNM*XMK) * detInv; 
+	    var XLK = 1.0, YLK = 0.0,
+	    	XNM = curve[degree].x - curve[0].x, YNM = curve[degree].y - curve[0].y,
+	    	XMK = curve[0].x - 0.0, YMK = curve[0].y - 0.0,
+	    	det = XNM*YLK - YNM*XLK, detInv = 1.0/det,
+	    	S = (XNM*YMK - YNM*XMK) * detInv; 
 	    return 0.0 + XLK * S;
 	};
 	var _bezier = function(curve, degree, t, left, right) {
@@ -250,18 +251,18 @@
 		var fns = _curveFunctionCache[order];
 		if (!fns) {
 			fns = [];			
-			var f_term = function() { return function(t) { return Math.pow(t, order); }; };
-			var l_term = function() { return function(t) { return Math.pow((1-t), order); }; };
-			var c_term = function(c) { return function(t) { return c; }; };
-			var t_term = function() { return function(t) { return t; }; };
-			var one_minus_t_term = function() { return function(t) { return 1-t; }; };
-			var _termFunc = function(terms) {
-				return function(t) {
-					var p = 1;
-					for (var i = 0; i < terms.length; i++) p = p * terms[i](t);
-					return p;
+			var f_term = function() { return function(t) { return Math.pow(t, order); }; },
+				l_term = function() { return function(t) { return Math.pow((1-t), order); }; },
+				c_term = function(c) { return function(t) { return c; }; },
+				t_term = function() { return function(t) { return t; }; },
+				one_minus_t_term = function() { return function(t) { return 1-t; }; },
+				_termFunc = function(terms) {
+					return function(t) {
+						var p = 1;
+						for (var i = 0; i < terms.length; i++) p = p * terms[i](t);
+						return p;
+					};
 				};
-			};
 			
 			fns.push(new f_term());  // first is t to the power of the curve order		
 			for (var i = 1; i < order; i++) {
@@ -285,8 +286,8 @@
 	 * @param location a decimal indicating the distance along the curve the point should be located at.  this is the distance along the curve as it travels, taking the way it bends into account.  should be a number from 0 to 1, inclusive.
 	 */
 	var _pointOnPath = function(curve, location) {		
-		var cc = _getCurveFunctions(curve.length - 1);
-		var _x = 0, _y = 0;
+		var cc = _getCurveFunctions(curve.length - 1),
+			_x = 0, _y = 0;
 		for (var i = 0; i < curve.length ; i++) {
 			_x = _x + (curve[i].x * cc[i](location));
 			_y = _y + (curve[i].y * cc[i](location));
@@ -301,8 +302,12 @@
 	 * point.
 	 */
 	var _pointAlongPath = function(curve, location, distance) {
-		var _dist = function(p1,p2) { return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)); };
-		var prev = _pointOnPath(curve, location), tally = 0, curLoc = location, direction = distance > 0 ? 1 : -1, cur = null;
+		var _dist = function(p1,p2) { return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)); },
+			prev = _pointOnPath(curve, location), 
+			tally = 0, 
+			curLoc = location, 
+			direction = distance > 0 ? 1 : -1, 
+			cur = null;
 		while (tally < Math.abs(distance)) {
 			curLoc += (0.005 * direction);
 			cur = _pointOnPath(curve, curLoc);
@@ -329,7 +334,7 @@
 		var p1 = _pointOnPath(curve, location),	
 			p2 = _pointOnPath(curve.slice(0, curve.length - 1), location),
 			dy = p2.y - p1.y, dx = p2.x - p1.x;
-		return dy == 0 ? 1 : Math.atan(dy / dx);		
+		return dy == 0 ? Infinity : Math.atan(dy / dx);		
 	};
 	
 	/**
@@ -350,11 +355,11 @@
 	 */
 	var _perpendicularToPathAt = function(curve, location, length, distance) {
 		distance = distance == null ? 0 : distance;
-		var p = _pointAlongPath(curve, location, distance);
-		var m = _gradientAtPoint(curve, p.location);
-		var _theta2 = Math.atan(-1 / m);
-		var y =  length / 2 * Math.sin(_theta2);
-		var x =  length / 2 * Math.cos(_theta2);
+		var p = _pointAlongPath(curve, location, distance),
+			m = _gradientAtPoint(curve, p.location),
+			_theta2 = Math.atan(-1 / m),
+			y =  length / 2 * Math.sin(_theta2),
+			x =  length / 2 * Math.cos(_theta2);
 		return [{x:p.point.x + x, y:p.point.y + y}, {x:p.point.x - x, y:p.point.y - y}];
 	};
 	
