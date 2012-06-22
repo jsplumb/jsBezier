@@ -4,13 +4,13 @@ This is a set of Bezier curve functions that deal with Beziers, used by jsPlumb,
 
 ## Notes
 
-### Functions are all in the 'jsBezier' namespace.
-
 - all input points should be in the format {x:.., y:..}. all output points are in this format too.
 - all input curves should be in the format [ {x:.., y:..}, {x:.., y:..}, {x:.., y:..}, {x:.., y:..} ]
 - The order of the points is [ start, control point 1, ..., control point N, end ]. __location__ as used as an input here refers to a decimal in the range 0-1 inclusive, which indicates a point some proportion along the length of the curve. location as output has the same format and meaning.
 
 ## Function List
+
+### Functions are all in the 'jsBezier' namespace.
 
 - __distanceFromCurve(point, curve)__
 
