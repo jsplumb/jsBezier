@@ -1,5 +1,5 @@
 /**
-* jsBezier-0.3
+* jsBezier-0.4
 *
 * Copyright (c) 2010 - 2011 Simon Porritt (simon.porritt@gmail.com)
 *
