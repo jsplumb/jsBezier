@@ -29,7 +29,7 @@
 * 
 * gradientAtPoint(curve, location)
 * 
-* 	Calculates the gradient to the curve at the given location, as a decimal between 0 and 1 inclusive.
+* 	Calculates the gradient to the curve at the given location, as a radian.
 *
 * gradientAtPointAlongCurveFrom (curve, location)
 *
@@ -357,7 +357,7 @@
 	};
 	
 	/**
-	 * returns the gradient of the curve at the given location, which is a decimal between 0 and 1 inclusive.
+	 * returns the gradient of the curve at the given location, which is a radian.
 	 * 
 	 * thanks // http://bimixual.org/AnimationLibrary/beziertangents.html
 	 */
