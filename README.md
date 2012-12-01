@@ -20,7 +20,7 @@ Calculates the distance that the given point lies from the given Bezier. Note th
 
 Calculates the gradient to the curve at the given location, as a decimal between 0 and 1 inclusive.
 
-- __gradientAtPointAlongCurveFrom(location, distance)__
+- __gradientAtPointAlongCurveFrom(curve, location, distance)__
 
 Calculates the gradient to the curve at the point which is 'distance' units from the given location. See pointAlongCurveFrom. 
 
