@@ -1,12 +1,12 @@
 {
   "name": "jsBezier",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "homepage": "https://github.com/jsplumb/jsBezier",
   "authors": [
     "jsPlumb <hello@jsplumbtoolkit.com>"
   ],
   "description": "Bezier curve helper functions for JavaScript. Used by jsPlumb; perhaps useful for others.",
-  "main": "js/jsBezier-0.7.js",
+  "main": "js/jsBezier-0.8.js",
   "keywords": [
     "bezier"
   ],
