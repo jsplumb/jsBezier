@@ -3,6 +3,12 @@
 This is a set of Bezier curve functions that deal with Beziers, used by jsPlumb, and perhaps useful for other 
 people. These functions work with Bezier curves of arbitrary degree.
 
+## Installation
+
+```
+npm install jsbezier
+```
+
 ## Notes
 
 - all input points should be in the format {x:.., y:..}. all output points are in this format too.
