@@ -1,5 +1,5 @@
 {
-    "name": "jsBezier",
+    "name": "jsbezier",
     "version": "0.9.0",
     "description": "Bezier curve helper functions for JavaScript. Used by jsPlumb; perhaps useful for others.",
     "main": "js/jsbezier.js",
