@@ -410,7 +410,7 @@
         return [{x:p.point.x + x, y:p.point.y + y}, {x:p.point.x - x, y:p.point.y - y}];
     };
 
-    this.jsBezier = {
+    var jsBezier = this.jsBezier = {
         distanceFromCurve : _distanceFromCurve,
         gradientAtPoint : _gradientAtPoint,
         gradientAtPointAlongCurveFrom : _gradientAtPointAlongPathFrom,
@@ -422,4 +422,9 @@
         getLength:_length,
         version:"0.9.0"
     };
+
+    if (typeof exports !== "undefined") {
+        exports.jsBezier = jsBezier;
+    }
+
 }).call(typeof window !== 'undefined' ? window : this);
