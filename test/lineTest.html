@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+
+
+    <body>
+        <script src="../js/jsbezier.js"></script>
+        <script>
+
+            var x1 = 300, x2 = 300, y1 = 50, y2 = 450,
+                curve = [
+                    { x:60, y:400 },
+                    { x:150, y:80 },
+                    { x:500, y:400 },
+                    { x:700, y:200 }
+                ];
+
+            jsBezier.lineIntersection(x1, y1, x2, y2, curve).forEach(function(i) { console.log(i[0], i[1])});
+
+            jsBezier.boxIntersection(x1, y1, 100, 400, curve).forEach(function(i) { console.log(i[0], i[1])});
+
+            jsBezier.boundingBoxIntersection({x:x1, y:y1, w:100, h:400}, curve).forEach(function(i) { console.log(i[0], i[1])});
+
+
+        </script>
+    </body>
+
+</html>

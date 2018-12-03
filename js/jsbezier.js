@@ -308,7 +308,7 @@
     };
 
     var _isPoint = function(curve) {
-        return curve[0].x == curve[1].x && curve[0].y == curve[1].y;
+        return curve[0].x === curve[1].x && curve[0].y === curve[1].y;
     };
 
     /**
@@ -381,7 +381,7 @@
         var p1 = _pointOnPath(curve, location),
             p2 = _pointOnPath(curve.slice(0, curve.length - 1), location),
             dy = p2.y - p1.y, dx = p2.x - p1.x;
-        return dy == 0 ? Infinity : Math.atan(dy / dx);
+        return dy === 0 ? Infinity : Math.atan(dy / dx);
     };
 
     /**
@@ -410,6 +410,149 @@
         return [{x:p.point.x + x, y:p.point.y + y}, {x:p.point.x - x, y:p.point.y - y}];
     };
 
+    /**
+     * Calculates all intersections of the given line with the given curve.
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @param curve
+     * @returns {Array}
+     */
+    var _lineIntersection = function(x1, y1, x2, y2, curve) {
+        var a = y2 - y1,
+            b = x1 - x2,
+            c = (x1 * (y1 - y2)) + (y1 * (x2-x1)),
+            coeffs = _computeCoefficients(curve),
+            p = [
+                (a*coeffs[0][0]) + (b * coeffs[1][0]),
+                (a*coeffs[0][1])+(b*coeffs[1][1]),
+                (a*coeffs[0][2])+(b*coeffs[1][2]),
+                (a*coeffs[0][3])+(b*coeffs[1][3]) + c
+            ],
+            r = _cubicRoots.apply(null, p),
+            intersections = [];
+
+        if (r != null) {
+
+            for (var i = 0; i < 3; i++) {
+                var t = r[i],
+                    t2 = Math.pow(t, 2),
+                    t3 = Math.pow(t, 3),
+                    x = [
+                        (coeffs[0][0] * t3) + (coeffs[0][1] * t2) + (coeffs[0][2] * t) + coeffs[0][3],
+                        (coeffs[1][0] * t3) + (coeffs[1][1] * t2) + (coeffs[1][2] * t) + coeffs[1][3]
+                    ];
+
+                // check bounds of the line
+                var s;
+                if ((x2 - x1) !== 0) {
+                    s = (x[0] - x1) / (x2 - x1);
+                }
+                else {
+                    s = (x[1] - y1) / (y2 - y1);
+                }
+
+                if (t >= 0 && t <= 1.0 && s >= 0 && s <= 1.0) {
+                    intersections.push(x);
+                }
+            }
+        }
+
+        return intersections;
+    };
+
+    /**
+     * Calculates all intersections of the given box with the given curve.
+     * @param x X position of top left corner of box
+     * @param y Y position of top left corner of box
+     * @param w width of box
+     * @param h height of box
+     * @param curve
+     * @returns {Array}
+     */
+    var _boxIntersection = function(x, y, w, h, curve) {
+        var i = [];
+        i.push.apply(i, _lineIntersection(x, y, x + w, y, curve));
+        i.push.apply(i, _lineIntersection(x + w, y, x + w, y + h, curve));
+        i.push.apply(i, _lineIntersection(x + w, y + h, x, y + h, curve));
+        i.push.apply(i, _lineIntersection(x, y + h, x, y, curve));
+        return i;
+    };
+
+    /**
+     * Calculates all intersections of the given bounding box with the given curve.
+     * @param boundingBox Bounding box, in { x:.., y:..., w:..., h:... } format.
+     * @param curve
+     * @returns {Array}
+     */
+    var _boundingBoxIntersection = function(boundingBox, curve) {
+        var i = [];
+        i.push.apply(i, _lineIntersection(boundingBox.x, boundingBox.y, boundingBox.x + boundingBox.w, boundingBox.y, curve));
+        i.push.apply(i, _lineIntersection(boundingBox.x + boundingBox.w, boundingBox.y, boundingBox.x + boundingBox.w, boundingBox.y + boundingBox.h, curve));
+        i.push.apply(i, _lineIntersection(boundingBox.x + boundingBox.w, boundingBox.y + boundingBox.h, boundingBox.x, boundingBox.y + boundingBox.h, curve));
+        i.push.apply(i, _lineIntersection(boundingBox.x, boundingBox.y + boundingBox.h, boundingBox.x, boundingBox.y, curve));
+        return i;
+    };
+
+
+    function _computeCoefficientsForAxis(curve, axis) {
+        return [
+            -(curve[0][axis]) + (3*curve[1][axis]) + (-3 * curve[2][axis]) + curve[3][axis],
+            (3*(curve[0][axis])) - (6*(curve[1][axis])) + (3*(curve[2][axis])),
+            -3*curve[0][axis] + 3*curve[1][axis],
+            curve[0][axis]
+        ];
+    }
+
+    function _computeCoefficients(curve)
+    {
+        return [
+            _computeCoefficientsForAxis(curve, "x"),
+            _computeCoefficientsForAxis(curve, "y"),
+        ];
+    }
+
+    function sgn(x) {
+        return x < 0 ? -1 : x > 0 ? 1 : 0;
+    }
+
+    function _cubicRoots(a, b, c, d) {
+        var A = b / a,
+            B = c / a,
+            C = d / a,
+            Q = (3*B - Math.pow(A, 2))/9,
+            R = (9*A*B - 27*C - 2*Math.pow(A, 3))/54,
+            D = Math.pow(Q, 3) + Math.pow(R, 2),
+            S,
+            T,
+            t = [];
+
+        if (D >= 0)                                 // complex or duplicate roots
+        {
+            S = sgn(R + Math.sqrt(D))*Math.pow(Math.abs(R + Math.sqrt(D)),(1/3));
+            T = sgn(R - Math.sqrt(D))*Math.pow(Math.abs(R - Math.sqrt(D)),(1/3));
+
+            t[0] = -A/3 + (S + T);
+            t[1] = -A/3 - (S + T)/2;
+            t[2] = -A/3 - (S + T)/2;
+
+            /*discard complex roots*/
+            if (Math.abs(Math.sqrt(3)*(S - T)/2) !== 0) {
+                return null;
+            }
+        }
+        else                                          // distinct real roots
+        {
+            var th = Math.acos(R/Math.sqrt(-Math.pow(Q, 3)));
+            t[0] = 2*Math.sqrt(-Q)*Math.cos(th/3) - A/3;
+            t[1] = 2*Math.sqrt(-Q)*Math.cos((th + 2*Math.PI)/3) - A/3;
+            t[2] = 2*Math.sqrt(-Q)*Math.cos((th + 4*Math.PI)/3) - A/3;
+        }
+
+        return t;
+    }
+
     var jsBezier = this.jsBezier = {
         distanceFromCurve : _distanceFromCurve,
         gradientAtPoint : _gradientAtPoint,
@@ -420,6 +563,9 @@
         perpendicularToCurveAt : _perpendicularToPathAt,
         locationAlongCurveFrom:_locationAlongPathFrom,
         getLength:_length,
+        lineIntersection:_lineIntersection,
+        boxIntersection:_boxIntersection,
+        boundingBoxIntersection:_boundingBoxIntersection,
         version:"0.9.0"
     };
 
