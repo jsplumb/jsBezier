@@ -147,7 +147,7 @@
             var lb = Math.max(0, k - m),
                 ub = Math.min(k, n);
             for (i = lb; i <= ub; i++) {
-                j = k - i;
+                var j = k - i;
                 w[i+j].y += cdTable[j][i] * z[j][i];
             }
         }
@@ -202,7 +202,8 @@
         b = curve[degree].x - curve[0].x;
         c = curve[0].x * curve[degree].y - curve[degree].x * curve[0].y;
 
-        var max_distance_above = max_distance_below = 0.0;
+        var max_distance_above, max_distance_below;
+        max_distance_above = max_distance_below = 0.0;
 
         for (var i = 1; i < degree; i++) {
             var value = a * curve[i].x + b * curve[i].y + c;
