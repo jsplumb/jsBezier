@@ -510,7 +510,7 @@
     {
         return [
             _computeCoefficientsForAxis(curve, "x"),
-            _computeCoefficientsForAxis(curve, "y"),
+            _computeCoefficientsForAxis(curve, "y")
         ];
     }
 
@@ -540,7 +540,8 @@
 
             /*discard complex roots*/
             if (Math.abs(Math.sqrt(3)*(S - T)/2) !== 0) {
-                return null;
+                t[1] = -1;
+                t[2] = -1;
             }
         }
         else                                          // distinct real roots
@@ -549,6 +550,13 @@
             t[0] = 2*Math.sqrt(-Q)*Math.cos(th/3) - A/3;
             t[1] = 2*Math.sqrt(-Q)*Math.cos((th + 2*Math.PI)/3) - A/3;
             t[2] = 2*Math.sqrt(-Q)*Math.cos((th + 4*Math.PI)/3) - A/3;
+        }
+
+        // discard out of spec roots
+        for (var i = 0; i < 3; i++) {
+            if (t[i] < 0 || t[i] > 1.0) {
+                t[i] = -1;
+            }
         }
 
         return t;
