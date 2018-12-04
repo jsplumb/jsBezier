@@ -14,12 +14,32 @@
                     { x:700, y:200 }
                 ];
 
+            console.log("1 - line");
             jsBezier.lineIntersection(x1, y1, x2, y2, curve).forEach(function(i) { console.log(i[0], i[1])});
-
+            console.log("1 - box");
             jsBezier.boxIntersection(x1, y1, 100, 400, curve).forEach(function(i) { console.log(i[0], i[1])});
-
+            console.log("1 - bounding box");
             jsBezier.boundingBoxIntersection({x:x1, y:y1, w:100, h:400}, curve).forEach(function(i) { console.log(i[0], i[1])});
 
+
+            var box2 = [-29,11, 120, 60],
+                curve2 = [
+                    { x:0,y:0}, {x:-10,y:150}, {x:169,y:2}, {x:159,y:152}
+                ];
+
+            console.log("2");
+            jsBezier.lineIntersection(box2[0],box2[1],box2[0] + box2[2], box2[1], curve2).forEach(function(i) { console.log(i[0], i[1])});
+
+
+            var curve3 = [
+                {x:281,y:89},
+                { x:209,y:743},
+                {x:693,y:258},
+                {x:686,y:703}
+            ]
+
+            console.log("3");
+            jsBezier.lineIntersection(88, 155, 486, 155, curve3).forEach(function(i) { console.log(i[0], i[1])});
 
         </script>
     </body>
