@@ -1,3 +1,9 @@
+0.9.4
+
+December 5th 2018
+
+- fix for cubic root calculation method
+
 0.9.3
 
 December 3rd 2018
